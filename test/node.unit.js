@@ -361,7 +361,7 @@ describe('Node', function() {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
-          port: 65522
+          port: 65524
         })),
         storage: storage,
         logger: new Logger(0)
@@ -636,7 +636,7 @@ describe('Node', function() {
       ).callsArgWith(1, null, []);
       var _getNearestContacts = sinon.stub(
         node._router, 'getNearestContacts'
-      ).returns([]);
+      ).callsArgWith(3, null, []);
       node._putValidatedKeyValue(
         Item('key', 'value', rpc._contact.nodeID),
         function() {
