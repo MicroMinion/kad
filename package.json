@@ -1,6 +1,6 @@
 {
   "name": "kad-js",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "implementation of the kademlia dht for node",
   "main": "index.js",
   "directories": {
@@ -39,29 +39,28 @@
     "node": "4.x.x"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "clarinet": "^0.11.0",
-    "colors": "^1.0.3",
+    "async": "2.0.1",
+    "clarinet": "0.11.0",
+    "colors": "1.1.2",
     "hat": "0.0.3",
-    "kad-fs": "0.0.4",
+    "kad-fs-thomas": "0.2.0",
     "kad-localstorage": "0.0.7",
-    "kad-memstore": "0.0.1",
-    "lodash": "^3.6.0",
-    "merge": "^1.2.0",
-    "ms": "^0.7.0"
+    "kad-memstore-thomas": "0.2.0",
+    "lodash": "4.15.0",
+    "merge": "1.2.0",
+    "ms": "0.7.1"
   },
   "devDependencies": {
-    "browserify": "^11.1.0",
-    "chai": "^2.2.0",
-    "coveralls": "^2.11.2",
-    "faker": "^2.1.2",
-    "ink-docstrap": "^1.1.2",
-    "istanbul": "^0.3.13",
-    "jsdoc": "^3.4.0",
-    "jshint": "2.8.0",
-    "mocha": "^2.2.4",
-    "pem": "^1.8.1",
-    "proxyquire": "^1.7.3",
-    "sinon": "^1.14.1"
+    "browserify": "13.1.0",
+    "chai": "3.5.0",
+    "coveralls": "2.11.12",
+    "faker": "3.1.0",
+    "istanbul": "0.4.5",
+    "jsdoc": "3.4.0",
+    "jshint": "2.9.3",
+    "mocha": "3.0.2",
+    "pem": "1.8.3",
+    "proxyquire": "1.7.10",
+    "sinon": "1.17.5"
   }
 }
