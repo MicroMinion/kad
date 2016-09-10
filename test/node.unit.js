@@ -1,47 +1,47 @@
-'use strict';
+'use strict'
 
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var utils = require('../lib/utils');
-var constants = require('../lib/constants');
-var KNode = require('../lib/node');
-var AddressPortContact = require('../lib/contacts/address-port-contact');
-var Bucket = require('../lib/bucket');
-var EventEmitter = require('events').EventEmitter;
-var Logger = require('../lib/logger');
-var transports = require('../lib/transports');
-var Item = require('../lib/item');
+var expect = require('chai').expect
+var sinon = require('sinon')
+var utils = require('../lib/utils')
+var constants = require('../lib/constants')
+var KNode = require('../lib/node')
+var AddressPortContact = require('../lib/contacts/address-port-contact')
+var Bucket = require('../lib/bucket')
+var EventEmitter = require('events').EventEmitter
+var Logger = require('../lib/logger')
+var transports = require('../lib/transports')
+var Item = require('../lib/item')
 
-function FakeStorage() {
-  this.data = {};
+function FakeStorage () {
+  this.data = {}
 }
 
-FakeStorage.prototype.get = function(key, cb) {
+FakeStorage.prototype.get = function (key, cb) {
   if (!this.data[key]) {
-    return cb(new Error('not found'));
+    return cb(new Error('not found'))
   }
-  cb(null, this.data[key]);
-};
+  cb(null, this.data[key])
+}
 
-FakeStorage.prototype.put = function(key, val, cb) {
-  this.data[key] = val;
-  cb(null, this.data[key]);
-};
+FakeStorage.prototype.put = function (key, val, cb) {
+  this.data[key] = val
+  cb(null, this.data[key])
+}
 
-FakeStorage.prototype.del = function(key, cb) {
-  delete this.data[key];
-  cb(null);
-};
+FakeStorage.prototype.del = function (key, cb) {
+  delete this.data[key]
+  cb(null)
+}
 
-FakeStorage.prototype.createReadStream = function() {
-  return new EventEmitter();
-};
+FakeStorage.prototype.createReadStream = function () {
+  return new EventEmitter()
+}
 
-describe('Node', function() {
+describe('Node', function () {
 
-  describe('#_ensureTransportState', function() {
+  describe('#_ensureTransportState', function () {
 
-    it('should wait for ready to callback', function(done) {
+    it('should wait for ready to callback', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -49,22 +49,22 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _on = sinon.stub(node._rpc, 'on');
-      node._rpc.readyState = 1;
-      node._ensureTransportState(sinon.stub());
-      setImmediate(function() {
-        _on.restore();
-        expect(_on.called).to.equal(true);
-        done();
-      });
-    });
+      })
+      var _on = sinon.stub(node._rpc, 'on')
+      node._rpc.readyState = 1
+      node._ensureTransportState(sinon.stub())
+      setImmediate(function () {
+        _on.restore()
+        expect(_on.called).to.equal(true)
+        done()
+      })
+    })
 
-  });
+  })
 
-  describe('#_put', function() {
+  describe('#_put', function () {
 
-    it('should put a valid key/value pair', function() {
+    it('should put a valid key/value pair', function () {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -72,51 +72,51 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _put = sinon.stub(node, '_putValidatedKeyValue');
-      node.put('key', 'value', function() {});
-      expect(_put.callCount).to.equal(1);
-    });
+      })
+      var _put = sinon.stub(node, '_putValidatedKeyValue')
+      node.put('key', 'value', function () {})
+      expect(_put.callCount).to.equal(1)
+    })
 
-    it('should send a key/value pair to validator', function(done) {
+    it('should send a key/value pair to validator', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
           port: 65528
         })),
         storage: new FakeStorage(),
-        validator: function(key, value) {
-          expect(key).to.equal('key');
-          expect(value).to.equal('value');
-          done();
+        validator: function (key, value) {
+          expect(key).to.equal('key')
+          expect(value).to.equal('value')
+          done()
         },
         logger: new Logger(0)
-      });
-      node.put('key', 'value', function() {});
-    });
+      })
+      node.put('key', 'value', function () {})
+    })
 
-    it('should not put an invalid key/value pair', function() {
+    it('should not put an invalid key/value pair', function () {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
           port: 65528
         })),
         storage: new FakeStorage(),
-        validator: function(key, value, callback) {
-          callback(false);
+        validator: function (key, value, callback) {
+          callback(false)
         },
         logger: new Logger(0)
-      });
-      var _put = sinon.stub(node, '_putValidatedKeyValue');
-      node.put('key', 'value', function() {});
-      expect(_put.callCount).to.equal(0);
-    });
+      })
+      var _put = sinon.stub(node, '_putValidatedKeyValue')
+      node.put('key', 'value', function () {})
+      expect(_put.callCount).to.equal(0)
+    })
 
-  });
+  })
 
-  describe('#_updateContact', function() {
+  describe('#_updateContact', function () {
 
-    it('should ping contact at head if bucket is full', function(done) {
+    it('should ping contact at head if bucket is full', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -124,39 +124,39 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
+      })
       var contact = new AddressPortContact({
         address: '127.0.0.1',
         port: 1234
-      });
-      var _send = sinon.stub(node._rpc, 'send', function(c, m, cb) {
-        cb();
-      });
-      var counter = 0;
-      var bucketContact;
-      node._router._buckets[159] = new Bucket();
+      })
+      var _send = sinon.stub(node._rpc, 'send', function (c, m, cb) {
+        cb()
+      })
+      var counter = 0
+      var bucketContact
+      node._router._buckets[159] = new Bucket()
       for (var i = 0; i < constants.K; i++) {
         bucketContact = AddressPortContact({
           address: '127.0.0.1',
           port: counter
-        });
-        node._router._buckets[159].addContact(bucketContact);
-        counter++;
+        })
+        node._router._buckets[159].addContact(bucketContact)
+        counter++
       }
-      node._router.updateContact(contact, function() {
+      node._router.updateContact(contact, function () {
         expect(
           node._router._buckets[159].hasContact(contact.nodeID)
-        ).to.equal(false);
-        _send.restore();
-        done();
-      });
-    });
+        ).to.equal(false)
+        _send.restore()
+        done()
+      })
+    })
 
-  });
+  })
 
-  describe('#_handlePing', function() {
+  describe('#_handlePing', function () {
 
-    it('should pong the contact', function(done) {
+    it('should pong the contact', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -164,12 +164,12 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _rpc = sinon.stub(node._rpc, 'send', function(c, m) {
-        expect(m.id).to.equal(utils.createID('data'));
-        _rpc.restore();
-        done();
-      });
+      })
+      var _rpc = sinon.stub(node._rpc, 'send', function (c, m) {
+        expect(m.id).to.equal(utils.createID('data'))
+        _rpc.restore()
+        done()
+      })
       node._handlePing({
         params: {
           contact: {
@@ -179,14 +179,14 @@ describe('Node', function() {
         },
         method: 'PING',
         id: utils.createID('data')
-      });
-    });
+      })
+    })
 
-  });
+  })
 
-  describe('#_handleStore', function() {
+  describe('#_handleStore', function () {
 
-    it('should halt if invalid key', function() {
+    it('should halt if invalid key', function () {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -194,8 +194,8 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _get = sinon.stub(node._storage, 'get');
+      })
+      var _get = sinon.stub(node._storage, 'get')
       node._handleStore({
         id: utils.createID('id'),
         params: {
@@ -209,12 +209,12 @@ describe('Node', function() {
           }
         },
         method: 'STORE'
-      });
-      expect(_get.callCount).to.equal(0);
-      _get.restore();
-    });
+      })
+      expect(_get.callCount).to.equal(0)
+      _get.restore()
+    })
 
-    it('should halt if no value', function() {
+    it('should halt if no value', function () {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -222,8 +222,8 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _get = sinon.stub(node._storage, 'get');
+      })
+      var _get = sinon.stub(node._storage, 'get')
       node._handleStore({
         id: utils.createID('id'),
         params: {
@@ -237,23 +237,23 @@ describe('Node', function() {
           }
         },
         method: 'STORE'
-      });
-      expect(_get.callCount).to.equal(0);
-    });
+      })
+      expect(_get.callCount).to.equal(0)
+    })
 
-    it('should halt if invalid key/value', function() {
+    it('should halt if invalid key/value', function () {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
           port: 65525
         })),
         storage: new FakeStorage(),
-        validator: function(key, value, callback) {
-          callback(false);
+        validator: function (key, value, callback) {
+          callback(false)
         },
         logger: new Logger(0)
-      });
-      var _get = sinon.stub(node._storage, 'get');
+      })
+      var _get = sinon.stub(node._storage, 'get')
       node._handleStore({
         method: 'STORE',
         params: {
@@ -267,25 +267,25 @@ describe('Node', function() {
           }
         },
         id: utils.createID('publisher')
-      });
-      expect(_get.callCount).to.equal(0);
-    });
+      })
+      expect(_get.callCount).to.equal(0)
+    })
 
-    it('should send key/value pair to validator', function(done) {
+    it('should send key/value pair to validator', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
           port: 65525
         })),
         storage: new FakeStorage(),
-        validator: function(key, value) {
-          expect(key).to.equal(utils.createID('key'));
-          expect(value).to.equal('value');
-          done();
+        validator: function (key, value) {
+          expect(key).to.equal(utils.createID('key'))
+          expect(value).to.equal('value')
+          done()
         },
         logger: new Logger(0)
-      });
-      var _get = sinon.stub(node._storage, 'get');
+      })
+      var _get = sinon.stub(node._storage, 'get')
       node._handleStore({
         params: {
           item: {
@@ -298,15 +298,15 @@ describe('Node', function() {
         },
         method: 'STORE',
         id: utils.createID('publisher')
-      });
-      expect(_get.callCount).to.equal(0);
-    });
+      })
+      expect(_get.callCount).to.equal(0)
+    })
 
-  });
+  })
 
-  describe('#_handleFindValue', function() {
+  describe('#_handleFindValue', function () {
 
-    it('should send contacts if no value found', function(done) {
+    it('should send contacts if no value found', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -314,12 +314,12 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _send = sinon.stub(node._rpc, 'send', function(c, m) {
-        expect(!!m.result.nodes).to.equal(true);
-        _send.restore();
-        done();
-      });
+      })
+      var _send = sinon.stub(node._rpc, 'send', function (c, m) {
+        expect(!!m.result.nodes).to.equal(true)
+        _send.restore()
+        done()
+      })
       node._handleFindValue({
         method: 'FIND_VALUE',
         params: {
@@ -330,14 +330,14 @@ describe('Node', function() {
           }
         },
         id: utils.createID('data')
-      });
-    });
+      })
+    })
 
-  });
+  })
 
-  describe('#get', function() {
+  describe('#get', function () {
 
-    it('should try from local storage if _findNode fails', function(done) {
+    it('should try from local storage if _findNode fails', function (done) {
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -345,19 +345,19 @@ describe('Node', function() {
         })),
         storage: new FakeStorage(),
         logger: new Logger(0)
-      });
-      var _findValue = sinon.stub(node._router, 'findValue', function(k, cb) {
-        cb(new Error('Failed for some reason'));
-      });
-      node.get('beep', function(err) {
-        expect(err.message).to.equal('not found');
-        _findValue.restore();
-        done();
-      });
-    });
+      })
+      var _findValue = sinon.stub(node._router, 'findValue', function (k, cb) {
+        cb(new Error('Failed for some reason'))
+      })
+      node.get('beep', function (err) {
+        expect(err.message).to.equal('not found')
+        _findValue.restore()
+        done()
+      })
+    })
 
-    it('should return the value in storage', function(done) {
-      var storage = new FakeStorage();
+    it('should return the value in storage', function (done) {
+      var storage = new FakeStorage()
       var node = KNode({
         transport: transports.UDP(AddressPortContact({
           address: '0.0.0.0',
@@ -365,20 +365,20 @@ describe('Node', function() {
         })),
         storage: storage,
         logger: new Logger(0)
-      });
-      storage.data.beep = JSON.stringify({ value: 'boop' });
-      node.get('beep', function(err, val) {
-        expect(err).to.equal(null);
-        expect(val).to.equal('boop');
-        done();
-      });
-    });
+      })
+      storage.data.beep = JSON.stringify({ value: 'boop' })
+      node.get('beep', function (err, val) {
+        expect(err).to.equal(null)
+        expect(val).to.equal('boop')
+        done()
+      })
+    })
 
-  });
+  })
 
-  describe('#_replicate', function() {
+  describe('#_replicate', function () {
 
-    var stream = new EventEmitter();
+    var stream = new EventEmitter()
     var node = KNode({
       transport: transports.UDP(AddressPortContact({
         address: '0.0.0.0',
@@ -386,21 +386,21 @@ describe('Node', function() {
       })),
       storage: new FakeStorage(),
       logger: new Logger(0)
-    });
+    })
 
-    node._storage.createReadStream = function() {
-      return stream;
-    };
+    node._storage.createReadStream = function () {
+      return stream
+    }
 
-    it('should replicate item did not publish after T_EXPIRE', function(done) {
-      var _put = sinon.stub(node, '_putValidatedKeyValue', function(i, cb) {
-        cb(null);
-        _put.restore();
-        stream.removeAllListeners();
-        done();
-      });
-      node._replicate();
-      setImmediate(function() {
+    it('should replicate item did not publish after T_EXPIRE', function (done) {
+      var _put = sinon.stub(node, '_putValidatedKeyValue', function (i, cb) {
+        cb(null)
+        _put.restore()
+        stream.removeAllListeners()
+        done()
+      })
+      node._replicate()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: JSON.stringify({
@@ -408,18 +408,18 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_REPUBLISH,
             publisher: utils.createID('some_other_node_id')
           })
-        });
-      });
-    });
+        })
+      })
+    })
 
-    it('should replicate item did publish after T_REPUBLISH', function(done) {
-      var _put = sinon.stub(node, 'put', function(k, v, cb) {
-        cb(null);
-        _put.restore();
-        done();
-      });
-      node._replicate();
-      setImmediate(function() {
+    it('should replicate item did publish after T_REPUBLISH', function (done) {
+      var _put = sinon.stub(node, 'put', function (k, v, cb) {
+        cb(null)
+        _put.restore()
+        done()
+      })
+      node._replicate()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: JSON.stringify({
@@ -427,33 +427,33 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_REPUBLISH,
             publisher: node._self.nodeID
           })
-        });
-      });
-    });
+        })
+      })
+    })
 
-    it('should call the error handler', function(done) {
-      var _error = sinon.stub(node._log, 'error', function() {
-        _error.restore();
-        done();
-      });
-      stream.emit('error', new Error());
-    });
+    it('should call the error handler', function (done) {
+      var _error = sinon.stub(node._log, 'error', function () {
+        _error.restore()
+        done()
+      })
+      stream.emit('error', new Error())
+    })
 
-    it('should call the end handler', function(done) {
-      var _info = sinon.stub(node._log, 'info', function() {
-        _info.restore();
-        done();
-      });
-      stream.emit('end');
-    });
+    it('should call the end handler', function (done) {
+      var _info = sinon.stub(node._log, 'info', function () {
+        _info.restore()
+        done()
+      })
+      stream.emit('end')
+    })
 
-    it('should log error if failed to parse value', function(done) {
-      var _log = sinon.stub(node._log, 'error', function() {
-        _log.restore();
-        done();
-      });
-      node._replicate();
-      setImmediate(function() {
+    it('should log error if failed to parse value', function (done) {
+      var _log = sinon.stub(node._log, 'error', function () {
+        _log.restore()
+        done()
+      })
+      node._replicate()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: {
@@ -461,21 +461,21 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_REPUBLISH,
             publisher: node._self.nodeID
           }
-        });
-      });
-    });
+        })
+      })
+    })
 
-    it('should log error if failed to republish', function(done) {
-      var _put = sinon.stub(node, 'put', function(k, v, cb) {
-        cb(new Error('FAIL'));
-        _put.restore();
-      });
-      var _log = sinon.stub(node._log, 'error', function() {
-        _log.restore();
-        done();
-      });
-      node._replicate();
-      setImmediate(function() {
+    it('should log error if failed to republish', function (done) {
+      var _put = sinon.stub(node, 'put', function (k, v, cb) {
+        cb(new Error('FAIL'))
+        _put.restore()
+      })
+      var _log = sinon.stub(node._log, 'error', function () {
+        _log.restore()
+        done()
+      })
+      node._replicate()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: JSON.stringify({
@@ -483,21 +483,21 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_REPUBLISH,
             publisher: node._self.nodeID
           })
-        });
-      });
-    });
+        })
+      })
+    })
 
-    it('should log error if failed to replicate', function(done) {
-      var _put = sinon.stub(node, '_putValidatedKeyValue', function(i, cb) {
-        cb(new Error('FAIL'));
-        _put.restore();
-      });
-      var _log = sinon.stub(node._log, 'error', function() {
-        _log.restore();
-        done();
-      });
-      node._replicate();
-      setImmediate(function() {
+    it('should log error if failed to replicate', function (done) {
+      var _put = sinon.stub(node, '_putValidatedKeyValue', function (i, cb) {
+        cb(new Error('FAIL'))
+        _put.restore()
+      })
+      var _log = sinon.stub(node._log, 'error', function () {
+        _log.restore()
+        done()
+      })
+      node._replicate()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: JSON.stringify({
@@ -505,15 +505,15 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_REPUBLISH,
             publisher: utils.createID('some_other_node_id')
           })
-        });
-      });
-    });
+        })
+      })
+    })
 
-  });
+  })
 
-  describe('#_expire', function() {
+  describe('#_expire', function () {
 
-    var stream = new EventEmitter();
+    var stream = new EventEmitter()
     var node = KNode({
       transport: transports.UDP(AddressPortContact({
         address: '0.0.0.0',
@@ -521,20 +521,20 @@ describe('Node', function() {
       })),
       storage: new FakeStorage(),
       logger: new Logger(0)
-    });
+    })
 
-    node._storage.createReadStream = function() {
-      return stream;
-    };
+    node._storage.createReadStream = function () {
+      return stream
+    }
 
-    it('should expire the item after T_EXPIRE', function(done) {
-      var _del = sinon.stub(node._storage, 'del', function(k, cb) {
-        cb(null);
-        _del.restore();
-        done();
-      });
-      node._expire();
-      setImmediate(function() {
+    it('should expire the item after T_EXPIRE', function (done) {
+      var _del = sinon.stub(node._storage, 'del', function (k, cb) {
+        cb(null)
+        _del.restore()
+        done()
+      })
+      node._expire()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: {
@@ -542,7 +542,7 @@ describe('Node', function() {
             timestamp: Date.now(),
             publisher: utils.createID('some_other_node_id')
           }
-        });
+        })
         stream.emit('data', {
           key: utils.createID('beep'),
           value: {
@@ -550,21 +550,21 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_EXPIRE,
             publisher: utils.createID('some_other_node_id')
           }
-        });
-      });
-    });
+        })
+      })
+    })
 
-    it('should log error on expiration failure', function(done) {
-      var _del = sinon.stub(node._storage, 'del', function(k, cb) {
-        cb(new Error('Fail'));
-        _del.restore();
-      });
-      var _log = sinon.stub(node._log, 'error', function() {
-        _log.restore();
-        done();
-      });
-      node._expire();
-      setImmediate(function() {
+    it('should log error on expiration failure', function (done) {
+      var _del = sinon.stub(node._storage, 'del', function (k, cb) {
+        cb(new Error('Fail'))
+        _del.restore()
+      })
+      var _log = sinon.stub(node._log, 'error', function () {
+        _log.restore()
+        done()
+      })
+      node._expire()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: {
@@ -572,7 +572,7 @@ describe('Node', function() {
             timestamp: Date.now(),
             publisher: utils.createID('some_other_node_id')
           }
-        });
+        })
         stream.emit('data', {
           key: utils.createID('beep'),
           value: {
@@ -580,14 +580,14 @@ describe('Node', function() {
             timestamp: Date.now() - constants.T_EXPIRE,
             publisher: utils.createID('some_other_node_id')
           }
-        });
-      });
-    });
+        })
+      })
+    })
 
-    it('should not expire the item', function(done) {
-      var _del = sinon.stub(node._storage, 'del');
-      node._expire();
-      setImmediate(function() {
+    it('should not expire the item', function (done) {
+      var _del = sinon.stub(node._storage, 'del')
+      node._expire()
+      setImmediate(function () {
         stream.emit('data', {
           key: utils.createID('beep'),
           value: {
@@ -595,86 +595,86 @@ describe('Node', function() {
             timestamp: Date.now() - 10000000000,
             publisher: utils.createID('some_other_node_id')
           }
-        });
-        expect(_del.called).to.equal(false);
-        _del.restore();
-        done();
-      });
+        })
+        expect(_del.called).to.equal(false)
+        _del.restore()
+        done()
+      })
 
-    });
+    })
 
-    it('should call the error handler', function(done) {
-      var _error = sinon.stub(node._log, 'error', function() {
-        _error.restore();
-        done();
-      });
-      stream.emit('error', new Error());
-    });
+    it('should call the error handler', function (done) {
+      var _error = sinon.stub(node._log, 'error', function () {
+        _error.restore()
+        done()
+      })
+      stream.emit('error', new Error())
+    })
 
-    it('should call the end handler', function(done) {
-      var _info = sinon.stub(node._log, 'info', function() {
-        _info.restore();
-        done();
-      });
-      stream.emit('end');
-    });
+    it('should call the end handler', function (done) {
+      var _info = sinon.stub(node._log, 'info', function () {
+        _info.restore()
+        done()
+      })
+      stream.emit('end')
+    })
 
-  });
+  })
 
-  describe('#_putValidatedKeyValue', function() {
+  describe('#_putValidatedKeyValue', function () {
 
-    it('should get nearest contacts if findNode fails', function(done) {
-      var rpc = new EventEmitter();
-      rpc._contact = { nodeID: utils.createID('publisher') };
+    it('should get nearest contacts if findNode fails', function (done) {
+      var rpc = new EventEmitter()
+      rpc._contact = { nodeID: utils.createID('publisher') }
       var node = KNode({
         storage: new FakeStorage(),
         transport: rpc,
         logger: new Logger(0)
-      });
+      })
       var _findNode = sinon.stub(
         node._router, 'findNode'
-      ).callsArgWith(1, null, []);
+      ).callsArgWith(1, null, [])
       var _getNearestContacts = sinon.stub(
         node._router, 'getNearestContacts'
-      ).callsArgWith(3, null, []);
+      ).callsArgWith(3, null, [])
       node._putValidatedKeyValue(
         Item('key', 'value', rpc._contact.nodeID),
-        function() {
-          expect(_getNearestContacts.called).to.equal(true);
-          _findNode.restore();
-          _getNearestContacts.restore();
-          done();
+        function () {
+          expect(_getNearestContacts.called).to.equal(true)
+          _findNode.restore()
+          _getNearestContacts.restore()
+          done()
         }
-      );
-    });
+      )
+    })
 
-  });
+  })
 
-  describe('#_storeValidatedKeyValue', function(done) {
-    var rpc = new EventEmitter();
+  describe('#_storeValidatedKeyValue', function (done) {
+    var rpc = new EventEmitter()
     rpc._contact = {
       nodeID: utils.createID('publisher')
-    };
-    rpc._createContact = sinon.stub().returns({});
-    rpc.send = sinon.stub();
+    }
+    rpc._createContact = sinon.stub().returns({})
+    rpc.send = sinon.stub()
     var node = KNode({
       storage: new FakeStorage(),
       transport: rpc,
       logger: new Logger(0)
-    });
-    var _warn = sinon.stub(node._log, 'warn');
+    })
+    var _warn = sinon.stub(node._log, 'warn')
     var _put = sinon.stub(
       node._storage, 'put'
-    ).callsArgWith(2, new Error('FAIL'));
+    ).callsArgWith(2, new Error('FAIL'))
     node._storeValidatedKeyValue({}, {
       params: { contact: {} },
       id: 1
-    }, function() {
-      expect(_warn.called).to.equal(true);
-      _warn.restore();
-      _put.restore();
-      done();
-    });
-  });
+    }, function () {
+      expect(_warn.called).to.equal(true)
+      _warn.restore()
+      _put.restore()
+      done()
+    })
+  })
 
-});
+})

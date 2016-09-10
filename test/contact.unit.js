@@ -1,45 +1,45 @@
-'use strict';
+'use strict'
 
-var utils = require('../lib/utils');
-var Contact = require('../lib/contact');
-var expect = require('chai').expect;
+var utils = require('../lib/utils')
+var Contact = require('../lib/contact')
+var expect = require('chai').expect
 
-describe('Contact', function() {
+describe('Contact', function () {
 
-  describe('@constructor', function() {
+  describe('@constructor', function () {
 
-    it('should create instance with the new keyword', function() {
+    it('should create instance with the new keyword', function () {
       expect(new Contact({
         nodeID: utils.createID('test')
-      })).to.be.instanceOf(Contact);
-    });
+      })).to.be.instanceOf(Contact)
+    })
 
-    it('should create instance without the new keyword', function() {
+    it('should create instance without the new keyword', function () {
       expect(Contact({
         nodeID: utils.createID('test')
-      })).to.be.instanceOf(Contact);
-    });
+      })).to.be.instanceOf(Contact)
+    })
 
-  });
+  })
 
-  describe('#_createNodeID', function() {
+  describe('#_createNodeID', function () {
 
-    it('should throw an error if unimplemented', function() {
-      expect(function() {
-        Contact({});
-      }).to.throw(Error);
-    });
+    it('should throw an error if unimplemented', function () {
+      expect(function () {
+        Contact({})
+      }).to.throw(Error)
+    })
 
-  });
+  })
 
-  describe('#valid', function() {
+  describe('#valid', function () {
 
-    it('should return true by default', function() {
+    it('should return true by default', function () {
       expect(Contact({
         nodeID: utils.createID('test')
-      }).valid()).to.equal(true);
-    });
+      }).valid()).to.equal(true)
+    })
 
-  });
+  })
 
-});
+})
